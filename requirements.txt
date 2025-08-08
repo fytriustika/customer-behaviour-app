@@ -1,3 +1,7 @@
 plotly
 scikit-learn
 seaborn
+streamlit
+pandas
+numpy
+matplotlib
