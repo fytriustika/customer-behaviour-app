@@ -11,6 +11,7 @@ from sklearn.metrics import (
 )
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
 
 st.set_page_config(page_title="E-commerce Analytics Dashboard", layout="wide")
 
@@ -23,6 +24,18 @@ def load_data():
 
 df1, df2 = load_data()
 
+# --- DATA COMPRESSION UTILITY ---
+def compress_and_save_data(df, base_filename):
+    # Save as a compressed CSV file (gzip)
+    csv_gz_path = f"{base_filename}.csv.gz"
+    df.to_csv(csv_gz_path, compression='gzip', index=False)
+
+    # Save as a Parquet file
+    parquet_path = f"{base_filename}.parquet"
+    df.to_parquet(parquet_path, index=False)
+
+    return csv_gz_path, parquet_path
+
 # --- DATA CLEANING ---
 df1 = df1.dropna()
 df1['Quantity'] = pd.to_numeric(df1['Quantity'], errors='coerce')
@@ -33,6 +46,15 @@ df1['CustomerID'] = df1['CustomerID'].astype(int)
 df1['InvoiceDate'] = pd.to_datetime(df1['InvoiceDate'])
 df1['TotalPrice'] = df1['Quantity'] * df1['UnitPrice']
 df1 = df1.drop_duplicates()
+
+# --- OPTIONAL: COMPRESS CLEANED DATASET AND PROVIDE DOWNLOAD LINKS ---
+if st.sidebar.button("Compress & Export Cleaned Dataset"):
+    csv_gz, parquet = compress_and_save_data(df1, "Online_Retail_Cleaned")
+    st.sidebar.success("Files saved!")
+    with open(csv_gz, "rb") as f:
+        st.sidebar.download_button("Download Compressed CSV (.csv.gz)", f, file_name="Online_Retail_Cleaned.csv.gz")
+    with open(parquet, "rb") as f:
+        st.sidebar.download_button("Download Parquet (.parquet)", f, file_name="Online_Retail_Cleaned.parquet")
 
 # --- EXECUTIVE KPIs ---
 kpi_total_customers = df1['CustomerID'].nunique()
