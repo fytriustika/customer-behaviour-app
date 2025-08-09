@@ -13,12 +13,10 @@ from sklearn.linear_model import LinearRegression
 import datetime as dt
 
 st.set_page_config(page_title="Customer Behaviour Dashboard", layout="wide")
-
 st.title("E-commerce Customer Behaviour Dashboard")
 
 @st.cache_data
 def load_data():
-    # You can change these to file uploader for more flexibility
     df1 = pd.read_excel('Online_Retail_Cleaned.xlsx')
     df2 = pd.read_csv('rfm_segmented.csv')
     return df1, df2
@@ -137,14 +135,14 @@ with tab1:
     st.dataframe(seg_df[['Recency', 'Frequency', 'Monetary']].describe())
 
     # Top 10 products for this segment
-    merged_df = pd.merge(df1, rfm_df, on='CustomerID', how='inner')
+    merged_df = pd.merge(df1, rfm_df, on='CustomerID', how='inner', suffixes=('_transaction', '_rfm'))
     top_products = merged_df[merged_df['Segment'] == seg]['Description'].value_counts().head(10)
     st.write(f"Top 10 Products Purchased by {seg} Segment")
     st.dataframe(top_products)
 
-    # Country distribution
+    # Country distribution (fix: use 'Country_transaction' instead of 'Country')
     st.write(f"Country Distribution for {seg} Segment")
-    country_counts = merged_df[merged_df['Segment'] == seg]['Country'].value_counts()
+    country_counts = merged_df[merged_df['Segment'] == seg]['Country_transaction'].value_counts()
     st.bar_chart(country_counts)
 
 with tab2:
